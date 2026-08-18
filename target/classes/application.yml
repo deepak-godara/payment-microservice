@@ -1,0 +1,51 @@
+spring:
+    application:
+        name: payment-service
+    datasource:
+        url: jdbc:postgresql://localhost:5432/payment-service
+        username: postgres
+        password: postgres
+        driver-class-name: org.postgresql.Driver
+        hikari:
+            maximum-pool-size: 20       # 6 Kafka threads + 5 refund poller + outbox poller + headroom
+            minimum-idle: 5
+            connection-timeout: 30000   # 30s — fail fast rather than hang indefinitely
+            idle-timeout: 600000
+            max-lifetime: 1800000
+    jpa:
+        hibernate:
+            ddl-auto: update
+        show-sql: true
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.PostgreSQLDialect
+    kafka:
+        bootstrap-servers: localhost:9092
+        producer:
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+            acks: all
+            retries: 3
+            properties:
+                enable.idempotence: true
+
+        consumer:
+            group-id: payment-service-refund-group # Consumer group name for partition assignment & offset tracking
+            auto-offset-reset: earliest # Reads from offset 0 if no prior commit offset exists (never misses payment events)
+            key-deserializer: org.apache.kafka.common.serialization.StringDeserializer # Converts key bytes to String
+            value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer # Converts JSON payload bytes to Java DTO
+            enable-auto-commit: false # Disables auto-commit so offsets are committed manually AFTER database updates succeed
+
+            properties:
+                spring.json.trusted.packages: "*" # Allows JSON deserialization across different package names
+
+        listener:
+            ack-mode: manual # Requires explicit ack.acknowledge() call in code after DB transaction commits
+          
+
+server:
+    servlet:
+        context-path: /api/v1
+    port: 8083
+
+

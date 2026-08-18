@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auction Payment</title>
+</head>
+<body>
+    <form id="paymentForm">
+        <label for="auctionId">Auction ID:</label>
+        <input type="number" id="auctionId" name="auctionId" required><br><br>
+
+        <label for="token">JWT Token:</label>
+        <input type="text" id="token" name="token" required><br><br>
+
+        <p id="errorMsg" style="color:red;"></p>
+
+        <button type="button" onclick="makePayment()">Pay Registration Fee</button>
+    </form>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        function makePayment() {
+            const auctionId = parseInt(document.getElementById('auctionId').value);
+            const token     = document.getElementById('token').value;
+
+            document.getElementById('errorMsg').textContent = '';
+
+            fetch('/api/v1/payment/order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    auctionId: auctionId,
+                    type: 'REGISTERATION'
+                })
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    return response.json().then(function(err) {
+                        throw new Error(err.message || 'Failed to create order');
+                    });
+                }
+                return response.json();
+            })
+            .then(function(order) {
+                const options = {
+                    "key": order.keyId,          // from response — not hardcoded
+                    "amount": order.amount,
+                    "currency": order.currency,
+                    "name": "Auction Platform",
+                    "description": "Registration Fee",
+                    "order_id": order.razorpayOrderId,
+                    "handler": function(response) {
+                        // webhook handles payment verification server-side
+                        window.location.href = '/success.html?orderId=' + order.razorpayOrderId;
+                    },
+                    "modal": {
+                        "ondismiss": function() {
+                            window.location.href = '/failure.html';
+                        }
+                    }
+                };
+                const rzp = new Razorpay(options);
+                rzp.open();
+            })
+            .catch(function(error) {
+                document.getElementById('errorMsg').textContent = error.message;
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
