@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import org.springframework.transaction.annotation.Transactional;
 import payment.model.RefundOrder;
+import payment.model.Types.RefundStatus;
 
 public interface RefundOrderRepository extends JpaRepository<RefundOrder,Long>{
     @Modifying
@@ -63,5 +64,7 @@ public interface RefundOrderRepository extends JpaRepository<RefundOrder,Long>{
            "WHERE r.status = payment.model.Types.RefundStatus.PROCESSING " +
            "AND r.updatedAt < :cutoff")
     int resetStuckProcessingOrders(@Param("cutoff") LocalDateTime cutoff);
+
+    List<RefundOrder> findAllByStatusAndAuctionId(RefundStatus status,Long auctionId);
 
 }

@@ -1,5 +1,7 @@
 package payment.controller;
 
+import java.util.List;
+
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +17,12 @@ import com.razorpay.RazorpayException;
 import com.razorpay.Utils;
 
 import lombok.RequiredArgsConstructor;
+import payment.dto.GetPendingRefundsDTO;
+import payment.dto.GetPendingRefundsResponseDTO;
 import payment.service.RefundService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -29,6 +36,12 @@ public class refundcontroller {
     @Value("${razorpay.webhook-secret}")
     private String webhookSecret;
 
+
+    @GetMapping("")
+    public ResponseEntity<List<GetPendingRefundsResponseDTO>> getMethodName(@RequestParam GetPendingRefundsDTO getPendingRefundsDTO) {
+        return ResponseEntity.ok(refundService.getRefunds(getPendingRefundsDTO));
+    }
+    
     @PostMapping("/webhook")
     public ResponseEntity<String> handleWebhook(
             @RequestBody String payload,

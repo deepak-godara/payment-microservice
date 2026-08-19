@@ -14,6 +14,8 @@ import com.razorpay.Refund;
 
 import lombok.RequiredArgsConstructor;
 import payment.Utils.CommonUtils;
+import payment.dto.GetPendingRefundsDTO;
+import payment.dto.GetPendingRefundsResponseDTO;
 import payment.model.RefundOrder;
 import payment.model.Types.RefundStatus;
 import payment.repository.RefundOrderRepository;
@@ -181,5 +183,18 @@ public class RefundService {
         commonUtils.markProcessedAndSaveOutbox(order, razorpayRefundId);
         log.info("RefundOrder updated to PROCESSED via webhook — orderId={} refundId={}",
                 order.getId(), razorpayRefundId);
+    }
+
+
+    public List<GetPendingRefundsResponseDTO> getRefunds(GetPendingRefundsDTO getPendingRefundsDTO){
+
+        return refundOrderRepository.findAllByStatusAndAuctionId(getPendingRefundsDTO.getStatus(),getPendingRefundsDTO.getAuctionId()).stream()
+                .map(item -> {
+                    return GetPendingRefundsResponseDTO.builder()
+                        .auctionId(item.getAuctionId())
+                        .bidderId(item.getBidderId())
+                    .build();
+                }).toList();
+
     }
 }
