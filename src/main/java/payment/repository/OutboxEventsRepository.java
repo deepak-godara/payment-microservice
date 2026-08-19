@@ -10,11 +10,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import payment.model.OutboxEvents;
+import payment.model.Types.OutboxEventStatus;
 
 public interface OutboxEventsRepository extends JpaRepository<OutboxEvents, Long> {
 
     // Idempotency — one outbox row per (auctionId + userId + topic)
     boolean existsByAuctionIdAndUserIdAndTopic(Long auctionId, String userId, String topic);
+
+    // Admin — events stuck at retryCount >= 5 and permanently FAILED
+    List<OutboxEvents> findByStatusAndRetryCountGreaterThanEqual(OutboxEventStatus status, int retryCount);
 
     // All PENDING rows regardless of topic — one poller handles everything
     @Query(value = "SELECT * FROM payment_outbox_events WHERE status = 'PENDING' " +
