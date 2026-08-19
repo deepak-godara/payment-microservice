@@ -14,8 +14,8 @@ import com.razorpay.Refund;
 
 import lombok.RequiredArgsConstructor;
 import payment.Utils.CommonUtils;
-import payment.dto.GetPendingRefundsDTO;
-import payment.dto.GetPendingRefundsResponseDTO;
+import payment.dto.GetRefundsDTO;
+import payment.dto.GetRefundsResponseDTO;
 import payment.model.RefundOrder;
 import payment.model.Types.RefundStatus;
 import payment.repository.RefundOrderRepository;
@@ -186,11 +186,11 @@ public class RefundService {
     }
 
 
-    public List<GetPendingRefundsResponseDTO> getRefunds(GetPendingRefundsDTO getPendingRefundsDTO){
+    public List<GetRefundsResponseDTO> getRefunds(GetRefundsDTO getPendingRefundsDTO){
 
         return refundOrderRepository.findAllByStatusAndAuctionId(getPendingRefundsDTO.getStatus(),getPendingRefundsDTO.getAuctionId()).stream()
                 .map(item -> {
-                    return GetPendingRefundsResponseDTO.builder()
+                    return GetRefundsResponseDTO.builder()
                         .auctionId(item.getAuctionId())
                         .bidderId(item.getBidderId())
                     .build();

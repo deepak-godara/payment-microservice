@@ -17,8 +17,8 @@ import com.razorpay.RazorpayException;
 import com.razorpay.Utils;
 
 import lombok.RequiredArgsConstructor;
-import payment.dto.GetPendingRefundsDTO;
-import payment.dto.GetPendingRefundsResponseDTO;
+import payment.dto.GetRefundsDTO;
+import payment.dto.GetRefundsResponseDTO;
 import payment.service.RefundService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,7 +38,7 @@ public class refundcontroller {
 
 
     @GetMapping("")
-    public ResponseEntity<List<GetPendingRefundsResponseDTO>> getMethodName(@RequestParam GetPendingRefundsDTO getPendingRefundsDTO) {
+    public ResponseEntity<List<GetRefundsResponseDTO>> getRefunds(@RequestParam GetRefundsDTO getPendingRefundsDTO) {
         return ResponseEntity.ok(refundService.getRefunds(getPendingRefundsDTO));
     }
     

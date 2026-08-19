@@ -6,7 +6,7 @@ import payment.model.Types.RefundStatus;
 
 @Data
 @RequiredArgsConstructor
-public class GetPendingRefundsDTO {
+public class GetRefundsDTO {
     private RefundStatus status;
     private Long auctionId;
     

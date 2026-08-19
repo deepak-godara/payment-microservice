@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-public class GetPendingRefundsResponseDTO {
+public class GetRefundsResponseDTO {
     private Long auctionId;
     private String bidderId;
 }
