@@ -8,10 +8,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import payment.dto.OutboxEventResponseDTO;
+import payment.model.Types.OutboxEventStatus;
 import payment.service.OutboxAdminService;
 
 @RestController
@@ -22,12 +24,14 @@ public class OutboxAdminController {
     private final OutboxAdminService outboxAdminService;
 
     // ─── GET /payment/outbox?status=FAILED ───────────────────────────────────
-    // Lists outbox events stuck at retryCount >= 5 (Kafka never delivered them)
+    // ?status=FAILED  → events stuck at retryCount >= 5
+    // ?status=PENDING → all PENDING events, etc.
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<OutboxEventResponseDTO>> getFailedOutboxEvents() {
-        return ResponseEntity.ok(outboxAdminService.getFailedEvents());
+    public ResponseEntity<List<OutboxEventResponseDTO>> getOutboxEventsByStatus(
+            @RequestParam OutboxEventStatus status) {
+        return ResponseEntity.ok(outboxAdminService.getEventsByStatus(status));
     }
 
     // ─── PATCH /payment/outbox/{id}/reset ────────────────────────────────────

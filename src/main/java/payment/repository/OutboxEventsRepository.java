@@ -20,6 +20,9 @@ public interface OutboxEventsRepository extends JpaRepository<OutboxEvents, Long
     // Admin — events stuck at retryCount >= 5 and permanently FAILED
     List<OutboxEvents> findByStatusAndRetryCountGreaterThanEqual(OutboxEventStatus status, int retryCount);
 
+    // Admin — all events with a given status (for non-FAILED queries)
+    List<OutboxEvents> findByStatus(OutboxEventStatus status);
+
     // All PENDING rows regardless of topic — one poller handles everything
     @Query(value = "SELECT * FROM payment_outbox_events WHERE status = 'PENDING' " +
                    "ORDER BY id ASC LIMIT :limit FOR UPDATE SKIP LOCKED",

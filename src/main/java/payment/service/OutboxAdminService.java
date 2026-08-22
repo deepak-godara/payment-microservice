@@ -19,14 +19,15 @@ public class OutboxAdminService {
 
     private final OutboxEventsRepository outboxEventsRepository;
 
-    // GET /payment/outbox?status=FAILED
-    // Returns events that hit retryCount >= 5 and are permanently stuck
-    public List<OutboxEventResponseDTO> getFailedEvents() {
-        return outboxEventsRepository
-                .findByStatusAndRetryCountGreaterThanEqual(OutboxEventStatus.FAILED, STUCK_RETRY_THRESHOLD)
-                .stream()
-                .map(this::toDTO)
-                .toList();
+    // GET /payment/outbox?status=FAILED  → events stuck at retryCount >= 5
+    // GET /payment/outbox?status=PENDING → all PENDING events, etc.
+    public List<OutboxEventResponseDTO> getEventsByStatus(OutboxEventStatus status) {
+        List<OutboxEvents> events = (status == OutboxEventStatus.FAILED)
+                ? outboxEventsRepository.findByStatusAndRetryCountGreaterThanEqual(
+                        OutboxEventStatus.FAILED, STUCK_RETRY_THRESHOLD)
+                : outboxEventsRepository.findByStatus(status);
+
+        return events.stream().map(this::toDTO).toList();
     }
 
     // PATCH /payment/outbox/{id}/reset
